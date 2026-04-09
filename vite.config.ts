@@ -4,9 +4,18 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
+function publicSiteUrl(env: Record<string, string>): string {
+  const fromEnv = (env.VITE_SITE_URL || "").trim().replace(/\/+$/, "");
+  if (fromEnv) return fromEnv;
+  // Build na Vercel: domínio real do deploy (evita og:image apontando para outro host).
+  const vercel = (process.env.VERCEL_URL || "").replace(/^https?:\/\//, "").replace(/\/+$/, "");
+  if (vercel) return `https://${vercel}`;
+  return "https://flameprovider.vercel.app";
+}
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  const siteUrl = (env.VITE_SITE_URL || "https://insta-beta-liart.vercel.app").replace(/\/+$/, "");
+  const siteUrl = publicSiteUrl(env);
   const ogImage = `${siteUrl}/og-share.png`;
 
   return {
